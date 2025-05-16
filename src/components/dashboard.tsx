@@ -1,0 +1,188 @@
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Filter } from "@/components/filter"
+import { Users } from "lucide-react"
+
+import { DataTable } from "@/components/data-table"
+import { columns } from "@/components/columns"
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+
+// Types for API responses
+// School for the table
+interface School {
+  rank: number
+  name: string
+  registrations: number
+  programme: string
+  academicYear: string
+}
+// Programme chart data
+interface ProgrammeData {
+  programme: string
+  count: number
+}
+// Academic year chart data
+interface AcademicYearData {
+  year: string
+  count: number
+}
+
+export type { School };
+
+interface DashboardProps {
+  totalRegistrations: number;
+  programmeData: ProgrammeData[];
+  academicYearData: AcademicYearData[];
+  schoolsData: School[];
+}
+
+export default function Dashboard({
+  totalRegistrations,
+  programmeData,
+  academicYearData,
+  schoolsData,
+}: DashboardProps) {
+  const [academicYear, setAcademicYear] = useState<string>("all")
+  const [programme, setProgramme] = useState<string>("all")
+
+  // Filter data based on selected filters
+  const filteredSchoolsData = schoolsData
+    .filter((school) => {
+      if (academicYear !== "all" && school.academicYear !== academicYear) return false
+      if (programme !== "all" && school.programme !== programme) return false
+      return true
+    })
+    .slice(0, 10) // Top 10 schools
+
+  // Chart configurations
+  const programmeChartConfig = {
+    count: {
+      label: "Registrations",
+      color: "hsl(var(--chart-1))",
+    },
+  } satisfies ChartConfig
+
+  const academicYearChartConfig = {
+    count: {
+      label: "Registrations",
+      color: "hsl(var(--chart-2))",
+    },
+  } satisfies ChartConfig
+
+  return (
+    <div className="flex min-h-screen w-full flex-col">
+      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold">{totalRegistrations.toLocaleString()}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-1 md:col-span-4">
+            <CardHeader>
+              <CardTitle>Registrations by Programme</CardTitle>
+              <CardDescription>Distribution across all programmes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={programmeChartConfig} className="h-[300px] sm:h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart accessibilityLayer data={programmeData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="programme"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                      tickFormatter={(value) => value.slice(0, 3)}
+                    />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
+                    <ChartTooltip
+                      cursor={false}
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value) => [`${value.toLocaleString()} students`, "Registrations"]}
+                        />
+                      }
+                    />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="col-span-3">
+            <CardHeader>
+              <CardTitle>Registrations by Academic Year</CardTitle>
+              <CardDescription>Year-over-year growth</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={academicYearChartConfig} className="h-[300px] sm:h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart accessibilityLayer data={academicYearData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="year" tickLine={false} tickMargin={10} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`}/>
+                    <ChartTooltip
+                      cursor={false}
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value) => [`${value.toLocaleString()} students`, "Registrations"]}
+                        />
+                      }
+                    />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Top 10 Secondary Schools</CardTitle>
+              <CardDescription>Schools with the highest number of registrations</CardDescription>
+              <Filter
+                academicYear={academicYear}
+                setAcademicYear={setAcademicYear}
+                programme={programme}
+                setProgramme={setProgramme}
+              />
+            </CardHeader>
+            <CardContent>
+              <DataTable columns={columns} data={filteredSchoolsData} />
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+      {/* Debug: Show raw data */}
+      <div className="bg-muted p-4 mt-8 rounded-lg text-xs overflow-x-auto">
+        <h2 className="font-bold mb-2">Raw Data</h2>
+        <div className="mb-2">
+          <span className="font-semibold">Programme Data:</span>
+          <pre>{JSON.stringify(programmeData, null, 2)}</pre>
+        </div>
+        <div className="mb-2">
+          <span className="font-semibold">Academic Year Data:</span>
+          <pre>{JSON.stringify(academicYearData, null, 2)}</pre>
+        </div>
+        <div>
+          <span className="font-semibold">Schools Data:</span>
+          <pre>{JSON.stringify(schoolsData, null, 2)}</pre>
+        </div>
+      </div>
+    </div>
+  )
+}
