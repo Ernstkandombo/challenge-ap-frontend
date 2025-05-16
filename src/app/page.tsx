@@ -46,10 +46,6 @@ export default async function Home() {
       fetch("http://127.0.0.1:8000/api/registrations-by-year").then(res => res.json()),
       fetch("http://127.0.0.1:8000/api/registrations-by-school").then(res => res.json()),
     ]);
-    console.log('total', total);
-    console.log('byProgramme', byProgramme);
-    console.log('byYear', byYear);
-    console.log('bySchool', bySchool);
     totalRegistrations = total.total_registrations || 0;
     programmeData = Array.isArray(byProgramme.registrations) ? byProgramme.registrations.map((item: ApiProgrammeItem) => ({
       programme: item.programme,

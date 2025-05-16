@@ -1,10 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Filter } from "@/components/filter"
 import { Users } from "lucide-react"
-
 import { DataTable } from "@/components/data-table"
 import { columns } from "@/components/columns"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts"
@@ -45,17 +42,14 @@ export default function Dashboard({
   academicYearData,
   schoolsData,
 }: DashboardProps) {
-  const [academicYear, setAcademicYear] = useState<string>("all")
-  const [programme, setProgramme] = useState<string>("all")
-
-  // Filter data based on selected filters
+  // Sort and get top 10 schools
   const filteredSchoolsData = schoolsData
-    .filter((school) => {
-      if (academicYear !== "all" && school.academicYear !== academicYear) return false
-      if (programme !== "all" && school.programme !== programme) return false
-      return true
-    })
+    .sort((a, b) => b.registrations - a.registrations) // Sort by registrations in descending order
     .slice(0, 10) // Top 10 schools
+    .map((school) => ({
+      name: school.name,
+      registrations: school.registrations
+    }));
 
   // Chart configurations
   const programmeChartConfig = {
@@ -65,36 +59,29 @@ export default function Dashboard({
     },
   } satisfies ChartConfig
 
-  const academicYearChartConfig = {
-    count: {
-      label: "Registrations",
-      color: "hsl(var(--chart-2))",
-    },
-  } satisfies ChartConfig
-
   return (
     <div className="flex min-h-screen w-full flex-col">
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <Card className="col-span-full md:col-span-2 lg:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{totalRegistrations.toLocaleString()}</div>
+              <div className="text-2xl md:text-3xl lg:text-4xl font-bold">{totalRegistrations.toLocaleString()}</div>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-1 md:col-span-4">
+          <Card className="col-span-full lg:col-span-4">
             <CardHeader>
               <CardTitle>Registrations by Programme</CardTitle>
               <CardDescription>Distribution across all programmes</CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={programmeChartConfig} className="h-[300px] sm:h-[400px]">
+              <ChartContainer config={programmeChartConfig} className="h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart accessibilityLayer data={programmeData}>
                     <CartesianGrid vertical={false} />
@@ -104,6 +91,9 @@ export default function Dashboard({
                       tickMargin={10}
                       axisLine={false}
                       tickFormatter={(value) => value.slice(0, 3)}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
                     />
                     <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
                     <ChartTooltip
@@ -121,18 +111,30 @@ export default function Dashboard({
             </CardContent>
           </Card>
 
-          <Card className="col-span-3">
+          <Card className="col-span-full lg:col-span-3">
             <CardHeader>
               <CardTitle>Registrations by Academic Year</CardTitle>
               <CardDescription>Year-over-year growth</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ChartContainer config={academicYearChartConfig} className="h-[300px] sm:h-[400px]">
+            <CardContent className="p-0">
+              <div className="w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart accessibilityLayer data={academicYearData}>
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="year" tickLine={false} tickMargin={10} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`}/>
+                    <XAxis 
+                      dataKey="year" 
+                      tickLine={false} 
+                      tickMargin={10} 
+                      axisLine={false}
+                      tickFormatter={(value) => value.toString()}
+                      width={60}
+                    />
+                    <YAxis 
+                      tickLine={false} 
+                      axisLine={false} 
+                      tickFormatter={(value) => `${value}`}
+                      width={40}
+                    />
                     <ChartTooltip
                       cursor={false}
                       content={
@@ -144,45 +146,26 @@ export default function Dashboard({
                     <Bar dataKey="count" fill="var(--color-count)" radius={4} />
                   </BarChart>
                 </ResponsiveContainer>
-              </ChartContainer>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        <div>
+        <div className="grid gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Top 10 Secondary Schools</CardTitle>
               <CardDescription>Schools with the highest number of registrations</CardDescription>
-              <Filter
-                academicYear={academicYear}
-                setAcademicYear={setAcademicYear}
-                programme={programme}
-                setProgramme={setProgramme}
-              />
             </CardHeader>
             <CardContent>
-              <DataTable columns={columns} data={filteredSchoolsData} />
+              <div className="overflow-x-auto">
+                <DataTable columns={columns} data={filteredSchoolsData} />
+              </div>
             </CardContent>
           </Card>
         </div>
       </main>
-      {/* Debug: Show raw data */}
-      <div className="bg-muted p-4 mt-8 rounded-lg text-xs overflow-x-auto">
-        <h2 className="font-bold mb-2">Raw Data</h2>
-        <div className="mb-2">
-          <span className="font-semibold">Programme Data:</span>
-          <pre>{JSON.stringify(programmeData, null, 2)}</pre>
-        </div>
-        <div className="mb-2">
-          <span className="font-semibold">Academic Year Data:</span>
-          <pre>{JSON.stringify(academicYearData, null, 2)}</pre>
-        </div>
-        <div>
-          <span className="font-semibold">Schools Data:</span>
-          <pre>{JSON.stringify(schoolsData, null, 2)}</pre>
-        </div>
-      </div>
     </div>
+      
   )
 }

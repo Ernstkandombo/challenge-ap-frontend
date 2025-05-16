@@ -1,22 +1,24 @@
 "use client"
 
-import type { ColumnDef } from "@tanstack/react-table"
-import type { School } from "./dashboard"
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
+import { ColumnDef } from "@tanstack/react-table"
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+export type School = {
+  name: string
+  registrations: number
+}
 
 export const columns: ColumnDef<School>[] = [
-  {
-    accessorKey: "rank",
-    header: "Rank",
-    cell: ({ row }) => <div className="text-center">{row.getValue("rank")}</div>,
-  },
   {
     accessorKey: "name",
     header: ({ column }) => {
       return (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="font-bold"
+        >
           School Name
           {column.getIsSorted() === "asc" ? (
             <ArrowUp className="ml-2 h-4 w-4" />
@@ -28,6 +30,7 @@ export const columns: ColumnDef<School>[] = [
         </Button>
       )
     },
+    cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
   },
   {
     accessorKey: "registrations",
@@ -36,9 +39,9 @@ export const columns: ColumnDef<School>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex justify-end w-full"
+          className="font-bold text-center"
         >
-          Registrations
+          Total Registrations
           {column.getIsSorted() === "asc" ? (
             <ArrowUp className="ml-2 h-4 w-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -50,18 +53,12 @@ export const columns: ColumnDef<School>[] = [
       )
     },
     cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue("registrations"))
-      return <div className="text-right font-medium">{amount}</div>
+      const amount = parseFloat(row.getValue("registrations"))
+      return (
+        <div className="text-center font-medium">
+          {amount.toLocaleString()}
+        </div>
+      )
     },
-  },
-  {
-    accessorKey: "programme",
-    header: "Programme",
-    cell: ({ row }) => <div>{row.getValue("programme")}</div>,
-  },
-  {
-    accessorKey: "academicYear",
-    header: "Academic Year",
-    cell: ({ row }) => <div>{row.getValue("academicYear")}</div>,
   },
 ]

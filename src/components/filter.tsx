@@ -8,9 +8,10 @@ interface FilterProps {
   setAcademicYear: (value: string) => void
   programme: string
   setProgramme: (value: string) => void
+  programmeData: { programme: string; count: number }[]
 }
 
-export function Filter({ academicYear, setAcademicYear, programme, setProgramme }: FilterProps) {
+export function Filter({ academicYear, setAcademicYear, programme, setProgramme, programmeData }: FilterProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mt-4">
       <div className="space-y-2">
@@ -21,11 +22,8 @@ export function Filter({ academicYear, setAcademicYear, programme, setProgramme 
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Years</SelectItem>
-            <SelectItem value="2023-2024">2023-2024</SelectItem>
-            <SelectItem value="2022-2023">2022-2023</SelectItem>
-            <SelectItem value="2021-2022">2021-2022</SelectItem>
-            <SelectItem value="2020-2021">2020-2021</SelectItem>
-            <SelectItem value="2019-2020">2019-2020</SelectItem>
+            <SelectItem value="2024">2024</SelectItem>
+            <SelectItem value="2023">2023</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -38,11 +36,11 @@ export function Filter({ academicYear, setAcademicYear, programme, setProgramme 
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Programmes</SelectItem>
-            <SelectItem value="Computer Science">Computer Science</SelectItem>
-            <SelectItem value="Engineering">Engineering</SelectItem>
-            <SelectItem value="Business">Business</SelectItem>
-            <SelectItem value="Medicine">Medicine</SelectItem>
-            <SelectItem value="Law">Law</SelectItem>
+            {programmeData.map((item) => (
+              <SelectItem key={item.programme} value={item.programme}>
+                {item.programme}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
