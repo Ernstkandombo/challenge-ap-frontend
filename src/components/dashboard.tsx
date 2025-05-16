@@ -117,35 +117,37 @@ export default function Dashboard({
               <CardDescription>Year-over-year growth</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart accessibilityLayer data={academicYearData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis 
-                      dataKey="year" 
-                      tickLine={false} 
-                      tickMargin={10} 
-                      axisLine={false}
-                      tickFormatter={(value) => value.toString()}
-                      width={60}
-                    />
-                    <YAxis 
-                      tickLine={false} 
-                      axisLine={false} 
-                      tickFormatter={(value) => `${value}`}
-                      width={40}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={
-                        <ChartTooltipContent
-                          formatter={(value) => [`${value.toLocaleString()} students`, "Registrations"]}
-                        />
-                      }
-                    />
-                    <Bar dataKey="count" fill="var(--color-count)" radius={4} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="w-full">
+                <ChartContainer config={programmeChartConfig} className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart accessibilityLayer data={academicYearData}>
+                      <CartesianGrid vertical={false} />
+                      <XAxis 
+                        dataKey="year" 
+                        tickLine={false} 
+                        tickMargin={10} 
+                        axisLine={false}
+                        tickFormatter={(value) => value.toString()}
+                        width={60}
+                      />
+                      <YAxis 
+                        tickLine={false} 
+                        axisLine={false} 
+                        tickFormatter={(value) => `${value}`}
+                        width={40}
+                      />
+                      <ChartTooltip
+                        cursor={false}
+                        content={
+                          <ChartTooltipContent
+                            formatter={(value) => [`${value.toLocaleString()} students`, "Registrations"]}
+                          />
+                        }
+                      />
+                      <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </CardContent>
           </Card>
